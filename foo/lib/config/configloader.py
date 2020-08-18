@@ -6,7 +6,6 @@ import yaml
 
 from typing import Optional
 
-# TODO s3 creds
 
 TEST_ENV = 'test'
 PROD_ENV = 'prod'
@@ -71,7 +70,7 @@ class ConfigLoader(metaclass=Singleton):
         env: str = os.getenv('ENVIRONMENT', default='')
         self.defaults = defaults if defaults else {}
 
-        print(f'Current environment is: {env!r}')  # TODO
+        print(f'Current environment is: {env!r}')
 
         if env == TEST_ENV:
             self._handler = self._local_loader
@@ -94,12 +93,14 @@ class ConfigLoader(metaclass=Singleton):
         else:
             raise ConfigLoaderException(f'File {path} does not exist')
 
-    def _s3_loader(self, path: str) -> dict:  # TODO s3 connection check
+    def _s3_loader(self, path: str) -> dict:
         try:
             s3 = boto3.client('s3')
             with tempfile.TemporaryFile("wb") as f:
                 s3.download_fileobj(self.S3_BUCKET, path, f)
                 config = yaml.load(f, Loader=yaml.BaseLoader)
+        except botocore.exceptions.NoCredentialsError:
+            raise ConfigLoaderException(f'No S3 credentials')
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchKey':
                 raise ConfigLoaderException(f'No such file {path}')
