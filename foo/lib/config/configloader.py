@@ -87,7 +87,7 @@ class ConfigLoader(metaclass=Singleton):
         if os.path.isfile(path):
             try:
                 with open(path) as f:
-                    config = yaml.load(f)
+                    config = yaml.load(f, Loader=yaml.BaseLoader)
             except IOError:
                 raise ConfigLoaderException(f'Error opening {path}')
             return config
@@ -99,7 +99,7 @@ class ConfigLoader(metaclass=Singleton):
             s3 = boto3.client('s3')
             with tempfile.TemporaryFile("wb") as f:
                 s3.download_fileobj(self.S3_BUCKET, path, f)
-                config = yaml.load(f)
+                config = yaml.load(f, Loader=yaml.BaseLoader)
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchKey':
                 raise ConfigLoaderException(f'No such file {path}')
