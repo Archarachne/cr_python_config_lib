@@ -87,7 +87,7 @@ class ConfigLoader(metaclass=Singleton):
             try:
                 with open(path) as f:
                     config = yaml.load(f, Loader=yaml.BaseLoader)
-            except IOError:
+            except OSError:
                 raise ConfigLoaderException(f'Error opening {path}')
             if not isinstance(config, dict):
                 raise ConfigLoaderException(f'Improperly configured config file')
@@ -108,7 +108,7 @@ class ConfigLoader(metaclass=Singleton):
                 raise ConfigLoaderException(f'No such file {path}')
             else:
                 raise ConfigLoaderException(f'Could not connect to S3')
-        except IOError:
+        except OSError:
             raise ConfigLoaderException(f'Error when opening {path}')
         if not isinstance(config, dict):
             raise ConfigLoaderException(f'Improperly configured config file')
