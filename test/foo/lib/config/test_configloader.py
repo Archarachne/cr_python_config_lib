@@ -37,7 +37,9 @@ def test_failed_load():
     with pytest.raises(ConfigLoaderException) as cle:
         cfg_loader.load('test/foo/lib/config/failed-config.yaml')
     assert 'Improperly configured' in str(cle.value)
-
+    with pytest.raises(ConfigLoaderException) as cle:
+        cfg_loader.load('test/foo/lib/config/empty-config.yaml')
+    assert 'Improperly configured' in str(cle.value)
 
 def test_is_a_singleton():
     c1 = ConfigLoader(defaults={'VAR0': 'default value 0'})
