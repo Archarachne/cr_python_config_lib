@@ -6,15 +6,16 @@ from foo.lib.config import ConfigLoader, ConfigLoaderException
 
 
 @pytest.fixture(autouse=True)
-def reset_config_loader_singleton():
+def reset_config_loader_singleton(monkeypatch):
     ConfigLoader._instances = {}
     ConfigLoader._instance_ready = False
+    monkeypatch.setenv('ENVIRONMENT', 'test')
 
 
 def test_load(monkeypatch):
     source_path = 'test/foo/lib/config/config.yaml'
-
     monkeypatch.setenv('VAR3', 'not bar')
+
     cfg_loader = ConfigLoader(defaults={'VAR0': 'default value 0',
                                         'VAR1': 'default value 1'})
     config = cfg_loader.load(source_path)
