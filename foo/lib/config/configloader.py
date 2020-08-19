@@ -12,10 +12,12 @@ PROD_ENV = 'prod'
 
 
 class ConfigLoaderException(Exception):
+    """Overriden base :class:`Exception`"""
     pass
 
 
 class Config:
+    """Main configuration object"""
 
     def __init__(self, config: dict, source: str):
         self._config = config
@@ -35,9 +37,16 @@ class Config:
 
     @property
     def source(self):
+        """Returns :attr:`_source` value"""
         return self._source
 
     def get(self, name, default=None):
+        """
+        :param name: key
+        :param default: string default value
+
+        :return: :attr:`_config[key]` value or :attr:`default`
+        """
         return self._config.get(name, default)
 
 
@@ -83,6 +92,12 @@ class ConfigLoader(metaclass=Singleton):
         self._instance_ready = True
 
     def _local_loader(self, path: str) -> dict:
+        """
+        :param path: config file location
+        :return: loaded config as a `dict` structure
+
+        Loads config from a yaml file located :attr:`path` in test environment.
+        """
         if os.path.isfile(path):
             try:
                 with open(path) as f:
@@ -96,6 +111,12 @@ class ConfigLoader(metaclass=Singleton):
             raise ConfigLoaderException(f'File {path} does not exist')
 
     def _s3_loader(self, path: str) -> dict:
+        """
+        :param path: config file location in S3 bucket
+        :return: loaded config as a `dict` structure
+
+        Loads config from a yaml file downloded from S3 :attr:`path` in prod environment.
+        """
         try:
             s3 = boto3.client('s3')
             with tempfile.TemporaryFile("wb") as f:
@@ -115,6 +136,12 @@ class ConfigLoader(metaclass=Singleton):
         return config
 
     def load(self, path: str) -> Config:
+        """
+        :param path: config file location
+        :return: :class:`Config` instance
+
+        Using :func:`_handler` loads config file from :attr:`path`.
+        """
         if self._config:
             return self._config
 
@@ -131,4 +158,5 @@ class ConfigLoader(metaclass=Singleton):
         return self._config
 
     def reset(self):
+        """Sets :attr:`config` to `None` resetting the configuration"""
         self._config = None
